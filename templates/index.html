@@ -1,0 +1,99 @@
+{% extends 'base.html' %}
+{% block content %}
+<h1>Image Classification</h1>
+<h2>Video Feed</h2>
+<img src="{{url_for('videofeed')}}" height="480" width="640">
+<p>Take Picture</p>
+<button id="capture" onclick="capturePhoto()">Capture</button>
+<p>Classify Image</p>
+<button id="classify" onclick="classifyPhoto()">Classify</button>
+<div id="captureAlert" class="alert" role="alert" style="display: none;"></div>
+<div id="json_data"></div>
+<script>
+let captureButton = document.getElementById('capture');
+let isButtonEnabled = true;
+
+function enableCaptureButton() {
+	isButtonEnabled = true;
+	captureButton.disabled = false;
+	}
+function capturePhoto() {
+	if (!isButtonEnabled) {
+		    return;
+		}
+	captureButton.disabled = true;
+	isButtonEnabled = false;
+	const alertElement = document.getElementById('captureAlert');
+	fetch('/capture', {
+	   method: 'POST',
+    })
+    .then(response => response.json())
+    .then(data=> {
+		console.log(data);
+		enableCaptureButton();
+		alertElement.className = 'alert alert-success';
+		alertElement.textContent = 'Image taken';
+		    
+		})
+	.catch(error=> {
+	    console.error('Error capturing photo: ', error);
+	    alertElement.className = 'alert alert-danger';
+		alertElement.textContent = 'Error capturing photo.';
+		enableCaptureButton();
+	});
+	alertElement.style.display = 'block';
+		
+	setTimeout(() => {
+		alertElement.style.display = 'none';
+	}, 5000);
+		
+	
+}
+
+let classifyButton = document.getElementById('classify');
+let isClassifyEnabled = true;
+
+function enableClassifyButton() {
+	isClassifyEnabled = true;
+	classifyButton.disabled = false;
+	}
+function classifyPhoto() {
+	if (!isClassifyEnabled) {
+		    return;
+		}
+	classifyButton.disabled = true;
+	isClassifyEnabled = false;
+	const alertElement = document.getElementById('captureAlert');
+	fetch('/classify', {
+	   method: 'POST',
+	   headers: {
+	     'Content-Type': 'application/json'
+	}
+    })
+    .then(response => response.json())
+    .then(data=> {
+		console.log(data);
+		document.getElementById('json_data').innerHTML = JSON.stringify(data);
+		enableClassifyButton();
+		alertElement.className = 'alert alert-success';
+		alertElement.textContent = 'Image classified';
+		    
+		})
+	.catch(error=> {
+	    console.error('Error classifying: ', error);
+	    alertElement.className = 'alert alert-danger';
+		alertElement.textContent = 'Error classifying.';
+		enableClassifyButton();
+	});
+	alertElement.style.display = 'block';
+		
+	setTimeout(() => {
+		alertElement.style.display = 'none';
+		document.getElementById('json_data').innerHTML = ''
+	}, 5000);
+		
+	
+}
+
+</script>
+{% endblock %}
